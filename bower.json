@@ -1,0 +1,21 @@
+{
+  "name": "y13i.com",
+  "description": "http://y13i.com/",
+  "main": "index.js",
+  "authors": [
+    "y13i"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/y13i/y13i.com",
+  "moduleType": [],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "public/_bower",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap-sass": "~3.3.6"
+  }
+}

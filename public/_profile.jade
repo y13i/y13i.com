@@ -1,0 +1,31 @@
+table.table.table-responsive
+  tbody
+      tr.name
+        th Name
+        td
+          span(itemprop="name")
+            span(itemprop="familyName") Yamaguchi
+            | , 
+            span(itamprop="givenName") Yoriki
+          span(itemprop="name" lang="ja")
+            meta(itemprop="familyName" content="山口")
+            meta(itemprop="givenName" content="与力")
+      tr.alias
+        th Alias
+        td(itemprop="alternateName") y13i
+      tr.location
+        th Location
+        td(itemprop="homeLocation") Tokyo, Japan
+      tr.born
+        th Born
+        td(itemprop="birthDate") Sep. 19, 1987
+      tr.role
+        th Job
+        td(itemprop="jobTitle") Engineer (Cloud Infrastructure)
+      tr.skills
+        th Skills
+        td Amazon Web Services, Ruby, Node.js, etc.
+      tr.email
+        th Email
+        td
+          a(itemprop="email" href=("mailto://" + site.email))= site.email

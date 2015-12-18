@@ -1,0 +1,7 @@
+table.table.table-responsive
+  tbody
+    each work in works
+      tr
+        td= work.year
+        td= work.category
+        td !{work.content}
