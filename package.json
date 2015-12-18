@@ -4,8 +4,12 @@
   "description": "http://y13i.com/",
   "main": "index.js",
   "scripts": {
-    "bower": "bower init",
-    "deploy": "gulp"
+    "clean": "gulp clean",
+    "serve": "gulp serve",
+    "compile": "gulp compile",
+    "build": "gulp build",
+    "bower:install": "gulp bower:install",
+    "deploy": "gulp deploy"
   },
   "repository": {
     "type": "git",
