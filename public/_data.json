@@ -16,6 +16,11 @@
     "works": [
       {
         "year": 2015,
+        "category": "Photograph",
+        "content": "<a href=\"http://sc15th.com/tribute-album/\">Resonances -tribute to bermei.inazawa-</a> - Photograph"
+      },
+      {
+        "year": 2015,
         "category": "Press",
         "content": "<a href=\"http://gihyo.jp/magazine/wdpress/archive/2015/vol85\">WEB+DB PRESS Vol.85</a> - Feature 1: Automating AWS (Co-authored)"
       }
