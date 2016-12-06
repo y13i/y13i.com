@@ -27,7 +27,7 @@ main section {
   margin-bottom: 1.2em
 }
 
-main section h1 {
+main section h2 {
   margin-top: 0
 }
 
@@ -47,6 +47,10 @@ footer {
 
 #y13i section {
   padding: 0
+}
+
+#y13i th {
+  font-weight: normal
 }
 
 #y13i th,
