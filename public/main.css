@@ -1,14 +1,7 @@
 body {
   padding: 0 1em;
-  color: #4c6b72;
-  background-color: #f7f9fa;
-  background-image: url("/images/background.jpg");
-  background-repeat: no-repeat;
-  background-position: left top;
-  background-attachment: fixed;
-  background-size: cover;
   font-family: "Open Sans Condensed", sans-serif;
-  font-size: 1.8em
+  font-size: 1.9em
 }
 
 header {
