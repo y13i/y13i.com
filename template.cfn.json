@@ -209,6 +209,25 @@
                 "OutputArtifacts": [{ "Name": "builtAssets" }]
               }
             ]
+          },
+          {
+            "Name": "Deploy",
+            "Actions": [
+              {
+                "Name": "S3",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Provider": "S3",
+                  "Version": "1"
+                },
+                "Configuration": {
+                  "BucketName": { "Ref": "AppBucket" },
+                  "Extract": "true"
+                },
+                "InputArtifacts": [{ "Name": "builtAssets" }]
+              }
+            ]
           }
         ]
       }
