@@ -1,30 +1,30 @@
 {
   "Parameters": {
-    "CfnRoleArn": {
+    "CICfnRoleArn": {
       "Type": "String"
     },
-    "GithubConnectionArn": {
+    "CIGithubConnectionArn": {
       "Type": "String"
     },
-    "FullRepositoryId": {
+    "CIFullRepositoryId": {
       "Type": "String",
       "Description": "GitubUserName/RepoName"
     },
-    "BranchName": {
+    "CIBranchName": {
       "Type": "String",
       "Default": "main"
     },
-    "SlackChannelId": {
+    "CISlackChannelId": {
       "Type": "String",
       "Description": "To get the ID, open Slack, right click on the channel name in the left pane, then choose Copy Link. The channel ID is the 9-character string at the end of the URL. For example, ABCBBLZZZ."
     },
-    "SlackWorkspaceId": {
+    "CISlackWorkspaceId": {
       "Type": "String",
       "Description": "To get the workspace ID, you must perform the initial authorization flow with Slack in the AWS Chatbot console. Then you can copy and paste the workspace ID from the console."
     }
   },
   "Resources": {
-    "PipelineRole": {
+    "CIPipelineRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -42,7 +42,7 @@
         "ManagedPolicyArns": [{ "Ref": "PipelineRolePolicy" }]
       }
     },
-    "PipelineRolePolicy": {
+    "CIPipelineRolePolicy": {
       "Type": "AWS::IAM::ManagedPolicy",
       "Properties": {
         "PolicyDocument": {
@@ -51,7 +51,7 @@
             {
               "Effect": "Allow",
               "Action": ["codestar-connections:UseConnection"],
-              "Resource": { "Ref": "GithubConnectionArn" }
+              "Resource": { "Ref": "CIGithubConnectionArn" }
             },
             {
               "Effect": "Allow",
@@ -77,13 +77,13 @@
             {
               "Effect": "Allow",
               "Action": ["iam:PassRole"],
-              "Resource": { "Ref": "CfnRoleArn" }
+              "Resource": { "Ref": "CICfnRoleArn" }
             }
           ]
         }
       }
     },
-    "ArtifactBucket": {
+    "CIArtifactBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
         "LifecycleConfiguration": {
@@ -96,7 +96,7 @@
         }
       }
     },
-    "Pipeline": {
+    "CIPipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
       "Properties": {
         "Name": { "Ref": "AWS::StackName" },
@@ -119,13 +119,13 @@
                 },
                 "Configuration": {
                   "ConnectionArn": {
-                    "Ref": "GithubConnectionArn"
+                    "Ref": "CIGithubConnectionArn"
                   },
                   "FullRepositoryId": {
-                    "Ref": "FullRepositoryId"
+                    "Ref": "CIFullRepositoryId"
                   },
                   "BranchName": {
-                    "Ref": "BranchName"
+                    "Ref": "CIBranchName"
                   }
                 },
                 "OutputArtifacts": [{ "Name": "appSource" }]
@@ -146,7 +146,7 @@
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_IAM",
-                  "RoleArn": { "Ref": "CfnRoleArn" },
+                  "RoleArn": { "Ref": "CICfnRoleArn" },
                   "StackName": { "Ref": "AWS::StackName" },
                   "TemplatePath": "appSource::template.cfn.json",
                   "ParameterOverrides": {
@@ -155,27 +155,27 @@
                       [
                         "{",
                         {
-                          "Fn::Sub": "\"CfnRoleArn\": \"${CfnRoleArn}\""
+                          "Fn::Sub": "\"CICfnRoleArn\": \"${CICfnRoleArn}\""
                         },
                         ",",
                         {
-                          "Fn::Sub": "\"GithubConnectionArn\": \"${GithubConnectionArn}\""
+                          "Fn::Sub": "\"CIGithubConnectionArn\": \"${CIGithubConnectionArn}\""
                         },
                         ",",
                         {
-                          "Fn::Sub": "\"FullRepositoryId\": \"${FullRepositoryId}\""
+                          "Fn::Sub": "\"CIFullRepositoryId\": \"${CIFullRepositoryId}\""
                         },
                         ",",
                         {
-                          "Fn::Sub": "\"BranchName\": \"${BranchName}\""
+                          "Fn::Sub": "\"CIBranchName\": \"${CIBranchName}\""
                         },
                         ",",
                         {
-                          "Fn::Sub": "\"SlackChannelId\": \"${SlackChannelId}\""
+                          "Fn::Sub": "\"CISlackChannelId\": \"${CISlackChannelId}\""
                         },
                         ",",
                         {
-                          "Fn::Sub": "\"SlackWorkspaceId\": \"${SlackWorkspaceId}\""
+                          "Fn::Sub": "\"CISlackWorkspaceId\": \"${CISlackWorkspaceId}\""
                         },
                         "}"
                       ]
@@ -189,7 +189,7 @@
         ]
       }
     },
-    "PipelineNotificationRule": {
+    "CIPipelineNotificationRule": {
       "Type": "AWS::CodeStarNotifications::NotificationRule",
       "Properties": {
         "Name": { "Ref": "AWS::StackName" },
@@ -228,13 +228,13 @@
         ]
       }
     },
-    "NotificationTopic": {
+    "CINotificationTopic": {
       "Type": "AWS::SNS::Topic",
       "Properties": {
         "TopicName": { "Ref": "AWS::StackName" }
       }
     },
-    "NotificationTopicPolicy": {
+    "CINotificationTopicPolicy": {
       "Type": "AWS::SNS::TopicPolicy",
       "Properties": {
         "Topics": [
@@ -257,7 +257,7 @@
         }
       }
     },
-    "ChatbotRole": {
+    "CIChatbotRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -277,13 +277,13 @@
         ]
       }
     },
-    "SlackChannelConfiguration": {
+    "CISlackChannelConfiguration": {
       "Type": "AWS::Chatbot::SlackChannelConfiguration",
       "Properties": {
         "ConfigurationName": { "Ref": "AWS::StackName" },
         "IamRoleArn": { "Fn::GetAtt": ["ChatbotRole", "Arn"] },
-        "SlackChannelId": { "Ref": "SlackChannelId" },
-        "SlackWorkspaceId": { "Ref": "SlackWorkspaceId" },
+        "SlackChannelId": { "Ref": "CISlackChannelId" },
+        "SlackWorkspaceId": { "Ref": "CISlackWorkspaceId" },
         "SnsTopicArns": [{ "Ref": "NotificationTopic" }]
       }
     }
