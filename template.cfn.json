@@ -72,7 +72,12 @@
             {
               "Effect": "Allow",
               "Action": ["s3:*"],
-              "Resource": { "Fn::Sub": "${CIArtifactBucket.Arn}/*" }
+              "Resource": [
+                { "Fn::Sub": "${CIArtifactBucket.Arn}" },
+                { "Fn::Sub": "${CIArtifactBucket.Arn}/*" },
+                { "Fn::Sub": "${AppBucket.Arn}" },
+                { "Fn::Sub": "${AppBucket.Arn}/*" }
+              ]
             },
             {
               "Effect": "Allow",
