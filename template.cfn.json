@@ -451,7 +451,7 @@
           "IPV6Enabled": true,
           "Logging": {
             "Bucket": {
-              "Ref": "AppLoggingBucket"
+              "Fn::GetAtt": ["AppLoggingBucket", "DomainName"]
             },
             "IncludeCookies": true
           },
@@ -469,7 +469,7 @@
             {
               "Id": "AppBucket",
               "DomainName": {
-                "Fn::Sub": "${AppBucket.DomainName}"
+                "Fn::GetAtt": ["AppBucket", "DomainName"]
               },
               "S3OriginConfig": {
                 "OriginAccessIdentity": {
