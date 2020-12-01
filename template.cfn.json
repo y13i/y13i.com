@@ -200,7 +200,7 @@
             "Name": "Build",
             "Actions": [
               {
-                "Name": { "Ref": "CIBuildProject" },
+                "Name": "CodeBuild",
                 "ActionTypeId": {
                   "Category": "Build",
                   "Owner": "AWS",

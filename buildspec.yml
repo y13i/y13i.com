@@ -5,14 +5,13 @@ phases:
       nodejs: 12
   pre_build:
     commands:
-      - w
-      - pwd
       - ls -la
-      - node --version
-      - npm --version
+      # - cat package.json
+      # - npm install --production
   build:
     commands:
       - echo "nothing to do."
+      # - npm run build
 artifacts:
   name: builtAssets
   files:
