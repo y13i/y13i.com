@@ -196,7 +196,7 @@
         "Status": "ENABLED",
         "DetailType": "FULL",
         "Resource": {
-          "Fn::Sub": "arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${Pipeline}"
+          "Fn::Sub": "arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CIPipeline}"
         },
         "EventTypeIds": [
           "codepipeline-pipeline-action-execution-succeeded",
