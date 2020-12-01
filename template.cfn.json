@@ -286,6 +286,9 @@
         "SlackWorkspaceId": { "Ref": "CISlackWorkspaceId" },
         "SnsTopicArns": [{ "Ref": "CINotificationTopic" }]
       }
+    },
+    "AppBucket": {
+      "Type": "AWS::S3::Bucket"
     }
   }
 }
