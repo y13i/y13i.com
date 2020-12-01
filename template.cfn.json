@@ -155,11 +155,27 @@
                       [
                         "{",
                         {
+                          "Fn::Sub": "\"CfnRoleArn\": \"${CfnRoleArn}\""
+                        },
+                        ",",
+                        {
+                          "Fn::Sub": "\"GithubConnectionArn\": \"${GithubConnectionArn}\""
+                        },
+                        ",",
+                        {
                           "Fn::Sub": "\"FullRepositoryId\": \"${FullRepositoryId}\""
                         },
                         ",",
                         {
                           "Fn::Sub": "\"BranchName\": \"${BranchName}\""
+                        },
+                        ",",
+                        {
+                          "Fn::Sub": "\"SlackChannelId\": \"${SlackChannelId}\""
+                        },
+                        ",",
+                        {
+                          "Fn::Sub": "\"SlackWorkspaceId\": \"${SlackWorkspaceId}\""
                         },
                         "}"
                       ]
