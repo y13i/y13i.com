@@ -1,0 +1,19 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      nodejs: 12
+  pre_build:
+    commands:
+      - ls -la
+      # - cat package.json
+      # - npm install --production
+  build:
+    commands:
+      - echo "nothing to do."
+      # - npm run build
+artifacts:
+  name: builtAssets
+  files:
+    - "**/*"
+  base-directory: public
