@@ -405,6 +405,72 @@
     },
     "AppBucket": {
       "Type": "AWS::S3::Bucket"
+    },
+    "AppBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "AppBucket"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "CanonicalUser": {
+                  "Fn::Sub": "${AppOriginAccessIdentity.S3CanonicalUserId}"
+                }
+              },
+              "Action": "s3:GetObject",
+              "Resource": {
+                "Fn::Sub": "${AppBucket.Arn}/*"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "AppOriginAccessIdentity": {
+      "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+      "Properties": {
+        "CloudFrontOriginAccessIdentityConfig": {
+          "Comment": {
+            "Ref": "AWS::StackName"
+          }
+        }
+      }
+    },
+    "AppDistribution": {
+      "Type": "AWS::CloudFront::Distribution",
+      "Properties": {
+        "DistributionConfig": {
+          "Enabled": true,
+          "Comment": {
+            "Ref": "AWS::StackName"
+          },
+          "DefaultCacheBehavior": {
+            "TargetOriginId": "AppBucket",
+            "ViewerProtocolPolicy": "redirect-to-https",
+            "ForwardedValues": {
+              "QueryString": false
+            }
+          },
+          "Origins": [
+            {
+              "Id": "AppBucket",
+              "DomainName": {
+                "Fn::Sub": "${AppBucket.DomainName}"
+              },
+              "S3OriginConfig": {
+                "OriginAccessIdentity": {
+                  "Fn::Sub": "origin-access-identity/cloudfront/${AppOriginAccessIdentity}"
+                }
+              }
+            }
+          ]
+        }
+      }
     }
   }
 }
