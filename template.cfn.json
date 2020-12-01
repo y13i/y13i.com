@@ -1,30 +1,30 @@
 {
   "Parameters": {
-    "CfnRoleArn": {
+    "CICfnRoleArn": {
       "Type": "String"
     },
-    "GithubConnectionArn": {
+    "CIGithubConnectionArn": {
       "Type": "String"
     },
-    "FullRepositoryId": {
+    "CIFullRepositoryId": {
       "Type": "String",
       "Description": "GitubUserName/RepoName"
     },
-    "BranchName": {
+    "CIBranchName": {
       "Type": "String",
       "Default": "main"
     },
-    "SlackChannelId": {
+    "CISlackChannelId": {
       "Type": "String",
       "Description": "To get the ID, open Slack, right click on the channel name in the left pane, then choose Copy Link. The channel ID is the 9-character string at the end of the URL. For example, ABCBBLZZZ."
     },
-    "SlackWorkspaceId": {
+    "CISlackWorkspaceId": {
       "Type": "String",
       "Description": "To get the workspace ID, you must perform the initial authorization flow with Slack in the AWS Chatbot console. Then you can copy and paste the workspace ID from the console."
     }
   },
   "Resources": {
-    "PipelineRole": {
+    "CIPipelineRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -39,10 +39,10 @@
             }
           ]
         },
-        "ManagedPolicyArns": [{ "Ref": "PipelineRolePolicy" }]
+        "ManagedPolicyArns": [{ "Ref": "CIPipelineRolePolicy" }]
       }
     },
-    "PipelineRolePolicy": {
+    "CIPipelineRolePolicy": {
       "Type": "AWS::IAM::ManagedPolicy",
       "Properties": {
         "PolicyDocument": {
@@ -51,7 +51,7 @@
             {
               "Effect": "Allow",
               "Action": ["codestar-connections:UseConnection"],
-              "Resource": { "Ref": "GithubConnectionArn" }
+              "Resource": { "Ref": "CIGithubConnectionArn" }
             },
             {
               "Effect": "Allow",
@@ -72,18 +72,28 @@
             {
               "Effect": "Allow",
               "Action": ["s3:*"],
-              "Resource": { "Fn::Sub": "${ArtifactBucket.Arn}/*" }
+              "Resource": [
+                { "Fn::Sub": "${CIArtifactBucket.Arn}" },
+                { "Fn::Sub": "${CIArtifactBucket.Arn}/*" },
+                { "Fn::Sub": "${AppBucket.Arn}" },
+                { "Fn::Sub": "${AppBucket.Arn}/*" }
+              ]
             },
             {
               "Effect": "Allow",
               "Action": ["iam:PassRole"],
-              "Resource": { "Ref": "CfnRoleArn" }
+              "Resource": { "Ref": "CICfnRoleArn" }
+            },
+            {
+              "Effect": "Allow",
+              "Action": ["codebuild:StartBuild", "codebuild:BatchGet*"],
+              "Resource": { "Fn::GetAtt": ["CIBuildProject", "Arn"] }
             }
           ]
         }
       }
     },
-    "ArtifactBucket": {
+    "CIArtifactBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
         "LifecycleConfiguration": {
@@ -96,14 +106,14 @@
         }
       }
     },
-    "Pipeline": {
+    "CIPipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
       "Properties": {
         "Name": { "Ref": "AWS::StackName" },
-        "RoleArn": { "Fn::GetAtt": ["PipelineRole", "Arn"] },
+        "RoleArn": { "Fn::GetAtt": ["CIPipelineRole", "Arn"] },
         "ArtifactStore": {
           "Type": "S3",
-          "Location": { "Ref": "ArtifactBucket" }
+          "Location": { "Ref": "CIArtifactBucket" }
         },
         "Stages": [
           {
@@ -119,13 +129,13 @@
                 },
                 "Configuration": {
                   "ConnectionArn": {
-                    "Ref": "GithubConnectionArn"
+                    "Ref": "CIGithubConnectionArn"
                   },
                   "FullRepositoryId": {
-                    "Ref": "FullRepositoryId"
+                    "Ref": "CIFullRepositoryId"
                   },
                   "BranchName": {
-                    "Ref": "BranchName"
+                    "Ref": "CIBranchName"
                   }
                 },
                 "OutputArtifacts": [{ "Name": "appSource" }]
@@ -146,7 +156,7 @@
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_IAM",
-                  "RoleArn": { "Ref": "CfnRoleArn" },
+                  "RoleArn": { "Ref": "CICfnRoleArn" },
                   "StackName": { "Ref": "AWS::StackName" },
                   "TemplatePath": "appSource::template.cfn.json",
                   "ParameterOverrides": {
@@ -155,27 +165,27 @@
                       [
                         "{",
                         {
-                          "Fn::Sub": "\"CfnRoleArn\": \"${CfnRoleArn}\""
+                          "Fn::Sub": "\"CICfnRoleArn\": \"${CICfnRoleArn}\""
                         },
                         ",",
                         {
-                          "Fn::Sub": "\"GithubConnectionArn\": \"${GithubConnectionArn}\""
+                          "Fn::Sub": "\"CIGithubConnectionArn\": \"${CIGithubConnectionArn}\""
                         },
                         ",",
                         {
-                          "Fn::Sub": "\"FullRepositoryId\": \"${FullRepositoryId}\""
+                          "Fn::Sub": "\"CIFullRepositoryId\": \"${CIFullRepositoryId}\""
                         },
                         ",",
                         {
-                          "Fn::Sub": "\"BranchName\": \"${BranchName}\""
+                          "Fn::Sub": "\"CIBranchName\": \"${CIBranchName}\""
                         },
                         ",",
                         {
-                          "Fn::Sub": "\"SlackChannelId\": \"${SlackChannelId}\""
+                          "Fn::Sub": "\"CISlackChannelId\": \"${CISlackChannelId}\""
                         },
                         ",",
                         {
-                          "Fn::Sub": "\"SlackWorkspaceId\": \"${SlackWorkspaceId}\""
+                          "Fn::Sub": "\"CISlackWorkspaceId\": \"${CISlackWorkspaceId}\""
                         },
                         "}"
                       ]
@@ -185,18 +195,56 @@
                 "InputArtifacts": [{ "Name": "appSource" }]
               }
             ]
+          },
+          {
+            "Name": "Build",
+            "Actions": [
+              {
+                "Name": "CodeBuild",
+                "ActionTypeId": {
+                  "Category": "Build",
+                  "Owner": "AWS",
+                  "Provider": "CodeBuild",
+                  "Version": "1"
+                },
+                "Configuration": {
+                  "ProjectName": { "Ref": "CIBuildProject" }
+                },
+                "InputArtifacts": [{ "Name": "appSource" }],
+                "OutputArtifacts": [{ "Name": "builtAssets" }]
+              }
+            ]
+          },
+          {
+            "Name": "Deploy",
+            "Actions": [
+              {
+                "Name": "S3",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Provider": "S3",
+                  "Version": "1"
+                },
+                "Configuration": {
+                  "BucketName": { "Ref": "AppBucket" },
+                  "Extract": "true"
+                },
+                "InputArtifacts": [{ "Name": "builtAssets" }]
+              }
+            ]
           }
         ]
       }
     },
-    "PipelineNotificationRule": {
+    "CIPipelineNotificationRule": {
       "Type": "AWS::CodeStarNotifications::NotificationRule",
       "Properties": {
         "Name": { "Ref": "AWS::StackName" },
         "Status": "ENABLED",
         "DetailType": "FULL",
         "Resource": {
-          "Fn::Sub": "arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${Pipeline}"
+          "Fn::Sub": "arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CIPipeline}"
         },
         "EventTypeIds": [
           "codepipeline-pipeline-action-execution-succeeded",
@@ -222,24 +270,24 @@
           {
             "TargetType": "SNS",
             "TargetAddress": {
-              "Ref": "NotificationTopic"
+              "Ref": "CINotificationTopic"
             }
           }
         ]
       }
     },
-    "NotificationTopic": {
+    "CINotificationTopic": {
       "Type": "AWS::SNS::Topic",
       "Properties": {
         "TopicName": { "Ref": "AWS::StackName" }
       }
     },
-    "NotificationTopicPolicy": {
+    "CINotificationTopicPolicy": {
       "Type": "AWS::SNS::TopicPolicy",
       "Properties": {
         "Topics": [
           {
-            "Ref": "NotificationTopic"
+            "Ref": "CINotificationTopic"
           }
         ],
         "PolicyDocument": {
@@ -251,13 +299,13 @@
                 "Service": ["codestar-notifications.amazonaws.com"]
               },
               "Action": "sns:Publish",
-              "Resource": { "Ref": "NotificationTopic" }
+              "Resource": { "Ref": "CINotificationTopic" }
             }
           ]
         }
       }
     },
-    "ChatbotRole": {
+    "CIChatbotRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -277,15 +325,164 @@
         ]
       }
     },
-    "SlackChannelConfiguration": {
+    "CISlackChannelConfiguration": {
       "Type": "AWS::Chatbot::SlackChannelConfiguration",
       "Properties": {
         "ConfigurationName": { "Ref": "AWS::StackName" },
-        "IamRoleArn": { "Fn::GetAtt": ["ChatbotRole", "Arn"] },
-        "SlackChannelId": { "Ref": "SlackChannelId" },
-        "SlackWorkspaceId": { "Ref": "SlackWorkspaceId" },
-        "SnsTopicArns": [{ "Ref": "NotificationTopic" }]
+        "IamRoleArn": { "Fn::GetAtt": ["CIChatbotRole", "Arn"] },
+        "SlackChannelId": { "Ref": "CISlackChannelId" },
+        "SlackWorkspaceId": { "Ref": "CISlackWorkspaceId" },
+        "SnsTopicArns": [{ "Ref": "CINotificationTopic" }]
       }
+    },
+    "CIBuildProject": {
+      "Type": "AWS::CodeBuild::Project",
+      "Properties": {
+        "Name": { "Ref": "AWS::StackName" },
+        "Artifacts": {
+          "Type": "CODEPIPELINE"
+        },
+        "Environment": {
+          "ComputeType": "BUILD_GENERAL1_SMALL",
+          "Image": "aws/codebuild/standard:4.0",
+          "Type": "LINUX_CONTAINER",
+          "PrivilegedMode": true
+        },
+        "ServiceRole": { "Fn::GetAtt": ["CIBuildRole", "Arn"] },
+        "Source": {
+          "Type": "CODEPIPELINE"
+        },
+        "LogsConfig": {
+          "CloudWatchLogs": {
+            "Status": "ENABLED",
+            "GroupName": { "Ref": "CILogGroup" },
+            "StreamName": "build"
+          }
+        }
+      }
+    },
+    "CIBuildRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": { "Fn::Sub": "codebuild.${AWS::URLSuffix}" }
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [{ "Ref": "CIBuildRolePolicy" }]
+      }
+    },
+    "CIBuildRolePolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": ["logs:CreateLogStream", "logs:PutLogEvents"],
+              "Resource": { "Fn::GetAtt": ["CILogGroup", "Arn"] }
+            },
+            {
+              "Effect": "Allow",
+              "Action": ["s3:GetObject", "s3:PutObject"],
+              "Resource": { "Fn::Sub": "${CIArtifactBucket.Arn}/*" }
+            }
+          ]
+        }
+      }
+    },
+    "CILogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": { "RetentionInDays": 365 }
+    },
+    "AppBucket": {
+      "Type": "AWS::S3::Bucket"
+    },
+    "AppBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "AppBucket"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "CanonicalUser": {
+                  "Fn::Sub": "${AppOriginAccessIdentity.S3CanonicalUserId}"
+                }
+              },
+              "Action": "s3:GetObject",
+              "Resource": {
+                "Fn::Sub": "${AppBucket.Arn}/*"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "AppOriginAccessIdentity": {
+      "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+      "Properties": {
+        "CloudFrontOriginAccessIdentityConfig": {
+          "Comment": {
+            "Ref": "AWS::StackName"
+          }
+        }
+      }
+    },
+    "AppDistribution": {
+      "Type": "AWS::CloudFront::Distribution",
+      "Properties": {
+        "DistributionConfig": {
+          "Enabled": true,
+          "DefaultRootObject": "index.html",
+          "HttpVersion": "http2",
+          "IPV6Enabled": true,
+          "Logging": {
+            "Bucket": {
+              "Fn::GetAtt": ["AppLoggingBucket", "DomainName"]
+            },
+            "IncludeCookies": true
+          },
+          "Comment": {
+            "Ref": "AWS::StackName"
+          },
+          "DefaultCacheBehavior": {
+            "TargetOriginId": "AppBucket",
+            "ViewerProtocolPolicy": "redirect-to-https",
+            "ForwardedValues": {
+              "QueryString": false
+            }
+          },
+          "Origins": [
+            {
+              "Id": "AppBucket",
+              "DomainName": {
+                "Fn::GetAtt": ["AppBucket", "DomainName"]
+              },
+              "S3OriginConfig": {
+                "OriginAccessIdentity": {
+                  "Fn::Sub": "origin-access-identity/cloudfront/${AppOriginAccessIdentity}"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "AppLoggingBucket": {
+      "Type": "AWS::S3::Bucket"
     }
   }
 }
