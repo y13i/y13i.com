@@ -78,6 +78,11 @@
               "Effect": "Allow",
               "Action": ["iam:PassRole"],
               "Resource": { "Ref": "CICfnRoleArn" }
+            },
+            {
+              "Effect": "Allow",
+              "Action": ["codebuild:StartBuild", "codebuild:BatchGet*"],
+              "Resource": { "Fn::GetAtt": ["CIBuildProject", "Arn"] }
             }
           ]
         }
@@ -185,6 +190,25 @@
                 "InputArtifacts": [{ "Name": "appSource" }]
               }
             ]
+          },
+          {
+            "Name": "Build",
+            "Actions": [
+              {
+                "Name": { "Ref": "CIBuildProject" },
+                "ActionTypeId": {
+                  "Category": "Build",
+                  "Owner": "AWS",
+                  "Provider": "CodeBuild",
+                  "Version": "1"
+                },
+                "Configuration": {
+                  "ProjectName": { "Ref": "CIBuildProject" }
+                },
+                "InputArtifacts": [{ "Name": "appSource" }],
+                "OutputArtifacts": [{ "Name": "builtAssets" }]
+              }
+            ]
           }
         ]
       }
@@ -286,6 +310,74 @@
         "SlackWorkspaceId": { "Ref": "CISlackWorkspaceId" },
         "SnsTopicArns": [{ "Ref": "CINotificationTopic" }]
       }
+    },
+    "CIBuildProject": {
+      "Type": "AWS::CodeBuild::Project",
+      "Properties": {
+        "Name": { "Ref": "AWS::StackName" },
+        "Artifacts": {
+          "Type": "CODEPIPELINE"
+        },
+        "Environment": {
+          "ComputeType": "BUILD_GENERAL1_SMALL",
+          "Image": "aws/codebuild/standard:4.0",
+          "Type": "LINUX_CONTAINER",
+          "PrivilegedMode": true
+        },
+        "ServiceRole": { "Fn::GetAtt": ["CIBuildRole", "Arn"] },
+        "Source": {
+          "Type": "CODEPIPELINE"
+        },
+        "LogsConfig": {
+          "CloudWatchLogs": {
+            "Status": "ENABLED",
+            "GroupName": { "Ref": "CILogGroup" },
+            "StreamName": "build"
+          }
+        }
+      }
+    },
+    "CIBuildRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": { "Fn::Sub": "codebuild.${AWS::URLSuffix}" }
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [{ "Ref": "CIBuildRolePolicy" }]
+      }
+    },
+    "CIBuildRolePolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": ["logs:CreateLogStream", "logs:PutLogEvents"],
+              "Resource": { "Fn::GetAtt": ["CILogGroup", "Arn"] }
+            },
+            {
+              "Effect": "Allow",
+              "Action": ["s3:GetObject", "s3:PutObject"],
+              "Resource": { "Fn::Sub": "${CIArtifactBucket.Arn}/*" }
+            }
+          ]
+        }
+      }
+    },
+    "CILogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": { "RetentionInDays": 365 }
     },
     "AppBucket": {
       "Type": "AWS::S3::Bucket"
