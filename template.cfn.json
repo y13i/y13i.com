@@ -39,7 +39,7 @@
             }
           ]
         },
-        "ManagedPolicyArns": [{ "Ref": "PipelineRolePolicy" }]
+        "ManagedPolicyArns": [{ "Ref": "CIPipelineRolePolicy" }]
       }
     },
     "CIPipelineRolePolicy": {
@@ -72,7 +72,7 @@
             {
               "Effect": "Allow",
               "Action": ["s3:*"],
-              "Resource": { "Fn::Sub": "${ArtifactBucket.Arn}/*" }
+              "Resource": { "Fn::Sub": "${CIArtifactBucket.Arn}/*" }
             },
             {
               "Effect": "Allow",
@@ -100,10 +100,10 @@
       "Type": "AWS::CodePipeline::Pipeline",
       "Properties": {
         "Name": { "Ref": "AWS::StackName" },
-        "RoleArn": { "Fn::GetAtt": ["PipelineRole", "Arn"] },
+        "RoleArn": { "Fn::GetAtt": ["CIPipelineRole", "Arn"] },
         "ArtifactStore": {
           "Type": "S3",
-          "Location": { "Ref": "ArtifactBucket" }
+          "Location": { "Ref": "CIArtifactBucket" }
         },
         "Stages": [
           {
@@ -222,7 +222,7 @@
           {
             "TargetType": "SNS",
             "TargetAddress": {
-              "Ref": "NotificationTopic"
+              "Ref": "CINotificationTopic"
             }
           }
         ]
@@ -239,7 +239,7 @@
       "Properties": {
         "Topics": [
           {
-            "Ref": "NotificationTopic"
+            "Ref": "CINotificationTopic"
           }
         ],
         "PolicyDocument": {
@@ -251,7 +251,7 @@
                 "Service": ["codestar-notifications.amazonaws.com"]
               },
               "Action": "sns:Publish",
-              "Resource": { "Ref": "NotificationTopic" }
+              "Resource": { "Ref": "CINotificationTopic" }
             }
           ]
         }
@@ -281,10 +281,10 @@
       "Type": "AWS::Chatbot::SlackChannelConfiguration",
       "Properties": {
         "ConfigurationName": { "Ref": "AWS::StackName" },
-        "IamRoleArn": { "Fn::GetAtt": ["ChatbotRole", "Arn"] },
+        "IamRoleArn": { "Fn::GetAtt": ["CIChatbotRole", "Arn"] },
         "SlackChannelId": { "Ref": "CISlackChannelId" },
         "SlackWorkspaceId": { "Ref": "CISlackWorkspaceId" },
-        "SnsTopicArns": [{ "Ref": "NotificationTopic" }]
+        "SnsTopicArns": [{ "Ref": "CINotificationTopic" }]
       }
     }
   }
