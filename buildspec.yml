@@ -8,8 +8,6 @@ phases:
       - ls -la
       - cat package.json
       - npm install
-      - npm run typecheck
-      - npm run lint
   build:
     commands:
       - npm run build
