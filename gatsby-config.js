@@ -10,7 +10,7 @@ module.exports = {
     language: "en",
     url: homepage,
     since: 2015,
-    image: "/images/exit.jpg",
+    image: "images/exit.jpg",
     social: {
       twitter: "y015i",
       facebook: "yoriki.yamaguchi",

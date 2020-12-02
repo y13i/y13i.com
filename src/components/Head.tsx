@@ -67,7 +67,14 @@ export const Head: React.FC<HeadProps> = (props = {}) => {
       <meta property="og:description" content={description} />
       <meta property="og:type" content={props.ogType || "website"} />
       <meta property="og:email" content={site?.siteMetadata?.author?.email} />
-      <meta property="og:image" content={site?.siteMetadata?.image} />
+      <meta
+        property="og:image"
+        content={
+          site?.siteMetadata?.url
+            ? site?.siteMetadata?.url + site?.siteMetadata?.image
+            : ""
+        }
+      />
       <meta
         property="fb:admins"
         content={site?.siteMetadata?.social?.facebook}
@@ -80,7 +87,14 @@ export const Head: React.FC<HeadProps> = (props = {}) => {
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:url" content={props.url || site?.siteMetadata?.url} />
-      <meta name="twitter:image" content={site?.siteMetadata?.image} />
+      <meta
+        name="twitter:image"
+        content={
+          site?.siteMetadata?.url
+            ? site?.siteMetadata?.url + site?.siteMetadata?.image
+            : ""
+        }
+      />
     </Helmet>
   );
 };
