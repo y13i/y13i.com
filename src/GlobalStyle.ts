@@ -2,7 +2,7 @@ import { createGlobalStyle } from "styled-components";
 import reset from "styled-reset";
 import { lighten } from "polished";
 
-import { themeColor } from "./variables";
+import { themeColor } from "./constants";
 
 export const GlobalStyle = createGlobalStyle`
   ${reset}

@@ -1,10 +1,11 @@
 import React from "react";
-import Container from "@material-ui/core/Container";
+import { Container } from "@material-ui/core";
 import styled from "styled-components";
 import "fontsource-roboto";
 
 import { Head, HeadProps } from "./Head";
 import { GlobalStyle } from "../GlobalStyle";
+import { globalContainerMaxWidth } from "../constants";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 
@@ -19,7 +20,7 @@ export const App: React.FC<React.PropsWithChildren<{ head?: HeadProps }>> = (
     <Head {...props.head} />
     <GlobalStyle />
     <Header />
-    <Container maxWidth="lg">
+    <Container maxWidth={globalContainerMaxWidth}>
       <Main>{props.children}</Main>
       <Footer />
     </Container>

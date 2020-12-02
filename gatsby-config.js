@@ -14,10 +14,6 @@ module.exports = {
     social: {
       twitter: "y015i",
       facebook: "yoriki.yamaguchi",
-      github: "y13i",
-      the500px: "y13i",
-      flickr: "y13i",
-      soundCloud: "y13i",
     },
   },
   plugins: [

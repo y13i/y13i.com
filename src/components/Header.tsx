@@ -1,11 +1,10 @@
 import React from "react";
 import { Link, useStaticQuery, graphql } from "gatsby";
-import Typography from "@material-ui/core/Typography";
-import Container from "@material-ui/core/Container";
+import { Typography, Container } from "@material-ui/core";
 import styled from "styled-components";
 import { lighten } from "polished";
 
-import { themeColor } from "../variables";
+import { globalContainerMaxWidth, themeColor } from "../constants";
 
 const StyledHeader = styled.header`
   background-color: ${themeColor};
@@ -14,7 +13,6 @@ const StyledHeader = styled.header`
 const StyledContainer = styled(Container)`
   display: flex;
   padding-top: 1rem;
-  text-transform: uppercase;
 
   * {
     font-family: "Open Sans Condensed", sans-serif;
@@ -30,6 +28,7 @@ const Title = styled(Typography)`
   font-weight: lighter;
   line-height: 0.77;
   vertical-align: middle;
+  text-transform: uppercase;
 `;
 
 const SourceCode = styled(Typography)`
@@ -56,7 +55,7 @@ export const Header: React.FC = () => {
 
   return (
     <StyledHeader>
-      <StyledContainer maxWidth="lg">
+      <StyledContainer maxWidth={globalContainerMaxWidth}>
         <Title variant="h1">
           <Link to="/" rel="me">
             {site?.siteMetadata?.title}
@@ -64,7 +63,7 @@ export const Header: React.FC = () => {
         </Title>
         <SourceCode variant="body1">
           {!site?.siteMetadata?.url || (
-            <Link to={site?.siteMetadata?.url}>source code</Link>
+            <a href={site?.siteMetadata?.url}>source code</a>
           )}
         </SourceCode>
       </StyledContainer>

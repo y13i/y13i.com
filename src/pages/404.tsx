@@ -1,6 +1,6 @@
 import React from "react";
 import { graphql, PageProps } from "gatsby";
-import Typography from "@material-ui/core/Typography";
+import { Typography } from "@material-ui/core";
 
 import { App } from "../components/App";
 
