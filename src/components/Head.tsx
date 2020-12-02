@@ -57,7 +57,7 @@ export const Head: React.FC<HeadProps> = (props = {}) => {
       }}
       title={title}
       link={[
-        { rel: "cannonical", href: props.url || site?.siteMetadata?.url },
+        { rel: "canonical", href: props.url || site?.siteMetadata?.url },
         { rel: "author", href: site?.siteMetadata?.author?.url },
       ]}
       meta={props.meta}
