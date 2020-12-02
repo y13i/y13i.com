@@ -104,7 +104,7 @@ const IconAndText = styled.div`
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  margin: 0.4rem 0;
+  margin: 0.75rem 0;
 
   p {
     margin-left: 0.33rem;
@@ -114,7 +114,7 @@ const IconAndText = styled.div`
 const Work = styled(TableRow)`
   td {
     border-bottom: none;
-    padding: 16px 6px;
+    padding: 12px 6px;
     font-size: 1rem;
   }
 `;
