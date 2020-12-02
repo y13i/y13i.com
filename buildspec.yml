@@ -3,7 +3,7 @@ phases:
   install:
     runtime-versions:
       nodejs: 12
-  post_build:
+  pre_build:
     commands:
       - ls -la
       - cat package.json
