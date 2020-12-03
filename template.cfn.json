@@ -21,6 +21,15 @@
     "CISlackWorkspaceId": {
       "Type": "String",
       "Description": "To get the workspace ID, you must perform the initial authorization flow with Slack in the AWS Chatbot console. Then you can copy and paste the workspace ID from the console."
+    },
+    "AppDomainName": {
+      "Type": "String"
+    },
+    "AppHostedZoneId": {
+      "Type": "AWS::Route53::HostedZone::Id"
+    },
+    "AppAcmCertificateArn": {
+      "Type": "String"
     }
   },
   "Resources": {
@@ -461,6 +470,12 @@
           "DefaultRootObject": "index.html",
           "HttpVersion": "http2",
           "IPV6Enabled": true,
+          "Aliases": [{ "Ref": "AppDomainName" }],
+          "ViewerCertificate": {
+            "AcmCertificateArn": { "Ref": "AppAcmCertificateArn" },
+            "SslSupportMethod": "sni-only",
+            "MinimumProtocolVersion": "TLSv1.2_2019"
+          },
           "Logging": {
             "Bucket": {
               "Fn::GetAtt": ["AppLoggingBucket", "DomainName"]
@@ -502,6 +517,20 @@
     },
     "AppLoggingBucket": {
       "Type": "AWS::S3::Bucket"
+    },
+    "AppRecordSet": {
+      "Type": "AWS::Route53::RecordSet",
+      "Properties": {
+        "Name": { "Ref": "AppDomainName" },
+        "HostedZoneId": { "Ref": "AppHostedZoneId" },
+        "Type": "A",
+        "AliasTarget": {
+          "HostedZoneId": "Z2FDTNDATAQYW2",
+          "DNSName": {
+            "Fn::GetAtt": ["AppDistribution", "DomainName"]
+          }
+        }
+      }
     }
   }
 }
