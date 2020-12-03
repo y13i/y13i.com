@@ -412,6 +412,81 @@
       "Type": "AWS::Logs::LogGroup",
       "Properties": { "RetentionInDays": 365 }
     },
+    "CIInvalidationFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Runtime": "nodejs12.x",
+        "Handler": "index.handler",
+        "Role": { "Fn::GetAtt": ["CIInvalidationFunctionRole", "Arn"] },
+        "Environment": {
+          "Variables": {
+            "DISTRIBUTION_ID": { "Ref": "AppDistribution" }
+          }
+        },
+        "Code": {
+          "ZipFile": {
+            "Fn::Join": [
+              "",
+              [
+                "const { CloudFront } = require('aws-sdk');",
+                "exports.handler = async () => {",
+                "  return await new CloudFront().createInvalidation({",
+                "    DistributionId: process.env.DISTRIBUTION_ID,",
+                "    InvalidationBatch: {",
+                "      CallerReference: Date.now().toString(),",
+                "      Paths: {",
+                "        Quantity: 1,",
+                "        Items: [",
+                "          '/*'",
+                "        ]",
+                "      }",
+                "    }",
+                "  }).promise();",
+                "};"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "CIInvalidationFunctionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": { "Fn::Sub": "lambda.${AWS::URLSuffix}" }
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+          { "Ref": "CIInvalidationFunctionRolePolicy" }
+        ]
+      }
+    },
+    "CIInvalidationFunctionRolePolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": ["cloudfront:CreateInvalidation"],
+              "Resource": {
+                "Fn::Sub": "arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${AppDistribution}"
+              }
+            }
+          ]
+        }
+      }
+    },
     "AppBucket": {
       "Type": "AWS::S3::Bucket"
     },
