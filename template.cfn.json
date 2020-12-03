@@ -642,6 +642,49 @@
           }
         }
       }
+    },
+    "AppNormalizeTrailingSlashFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Runtime": "nodejs12.x",
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": ["AppNormalizeTrailingSlashFunctionRole", "Arn"]
+        },
+        "Code": {
+          "ZipFile": {
+            "Fn::Join": [
+              "\n",
+              [
+                "exports.handler = (event) => {",
+                "  const request = event.Records[0].cf.request;",
+                "  return {...request, uri: request.uri.replace(//$/, '/index.html')};",
+                "};"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "AppNormalizeTrailingSlashFunctionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": { "Fn::Sub": "lambda.${AWS::URLSuffix}" }
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        ]
+      }
     }
   }
 }
