@@ -481,7 +481,7 @@
                 "        }",
                 "      }",
                 "    }).promise();",
-                "    console.log({createInvalidationResponse})",
+                "    console.log(JSON.stringify({createInvalidationResponse}))",
                 "    return await codePipeline.putJobSuccessResult({jobId}).promise();",
                 "  } catch(err) {",
                 "    return await codePipeline.putJobFailureResult({",
