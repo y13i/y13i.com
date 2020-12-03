@@ -656,8 +656,8 @@
             "Fn::Join": [
               "\n",
               [
-                "exports.handler = (event) => {",
-                "  const request = event.Records[0].cf.request;",
+                "exports.handler = async (event) => {",
+                "  const {request} = event.Records[0].cf;",
                 "  return {...request, uri: request.uri.replace(/\\/$/, '/index.html')};",
                 "};"
               ]
