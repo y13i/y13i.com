@@ -452,7 +452,7 @@
       "Properties": {
         "Runtime": "nodejs12.x",
         "Handler": "index.handler",
-        "Timeout": 10,
+        "Timeout": 20,
         "Role": { "Fn::GetAtt": ["CIInvalidationFunctionRole", "Arn"] },
         "Environment": {
           "Variables": {
