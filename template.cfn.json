@@ -652,18 +652,32 @@
     "AppLoggingBucket": {
       "Type": "AWS::S3::Bucket"
     },
-    "AppRecordSet": {
-      "Type": "AWS::Route53::RecordSet",
+    "AppRecordSetGroup": {
+      "Type": "AWS::Route53::RecordSetGroup",
       "Properties": {
-        "Name": { "Ref": "AppDomainName" },
         "HostedZoneId": { "Ref": "AppHostedZoneId" },
-        "Type": "A",
-        "AliasTarget": {
-          "HostedZoneId": "Z2FDTNDATAQYW2",
-          "DNSName": {
-            "Fn::GetAtt": ["AppDistribution", "DomainName"]
+        "RecordSets": [
+          {
+            "Name": { "Ref": "AppDomainName" },
+            "Type": "A",
+            "AliasTarget": {
+              "HostedZoneId": "Z2FDTNDATAQYW2",
+              "DNSName": {
+                "Fn::GetAtt": ["AppDistribution", "DomainName"]
+              }
+            }
+          },
+          {
+            "Name": { "Ref": "AppDomainName" },
+            "Type": "AAAA",
+            "AliasTarget": {
+              "HostedZoneId": "Z2FDTNDATAQYW2",
+              "DNSName": {
+                "Fn::GetAtt": ["AppDistribution", "DomainName"]
+              }
+            }
           }
-        }
+        ]
       }
     },
     "AppNormalizeTrailingSlashFunction": {
