@@ -196,6 +196,18 @@
                         {
                           "Fn::Sub": "\"CISlackWorkspaceId\": \"${CISlackWorkspaceId}\""
                         },
+                        ",",
+                        {
+                          "Fn::Sub": "\"AppDomainName\": \"${AppDomainName}\""
+                        },
+                        ",",
+                        {
+                          "Fn::Sub": "\"AppHostedZoneId\": \"${AppHostedZoneId}\""
+                        },
+                        ",",
+                        {
+                          "Fn::Sub": "\"AppAcmCertificateArn\": \"${AppAcmCertificateArn}\""
+                        },
                         "}"
                       ]
                     ]
