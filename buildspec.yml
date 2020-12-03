@@ -6,12 +6,15 @@ phases:
   pre_build:
     commands:
       - ls -la
-      # - cat package.json
-      # - npm install --production
+      - cat package.json
+      - npm install
   build:
     commands:
-      - echo "nothing to do."
-      # - npm run build
+      - npm run build
+  post_build:
+    commands:
+      - npm run typecheck
+      - npm run lint
 artifacts:
   name: builtAssets
   files:

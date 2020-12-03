@@ -21,6 +21,15 @@
     "CISlackWorkspaceId": {
       "Type": "String",
       "Description": "To get the workspace ID, you must perform the initial authorization flow with Slack in the AWS Chatbot console. Then you can copy and paste the workspace ID from the console."
+    },
+    "AppDomainName": {
+      "Type": "String"
+    },
+    "AppHostedZoneId": {
+      "Type": "AWS::Route53::HostedZone::Id"
+    },
+    "AppAcmCertificateArn": {
+      "Type": "String"
     }
   },
   "Resources": {
@@ -65,7 +74,8 @@
                 "cloudformation:DescribeChangeSet",
                 "cloudformation:ExecuteChangeSet",
                 "cloudformation:SetStackPolicy",
-                "cloudformation:ValidateTemplate"
+                "cloudformation:ValidateTemplate",
+                "lambda:ListFunctions"
               ],
               "Resource": "*"
             },
@@ -88,6 +98,11 @@
               "Effect": "Allow",
               "Action": ["codebuild:StartBuild", "codebuild:BatchGet*"],
               "Resource": { "Fn::GetAtt": ["CIBuildProject", "Arn"] }
+            },
+            {
+              "Effect": "Allow",
+              "Action": ["lambda:InvokeFunction"],
+              "Resource": { "Fn::GetAtt": ["CIInvalidationFunction", "Arn"] }
             }
           ]
         }
@@ -187,6 +202,18 @@
                         {
                           "Fn::Sub": "\"CISlackWorkspaceId\": \"${CISlackWorkspaceId}\""
                         },
+                        ",",
+                        {
+                          "Fn::Sub": "\"AppDomainName\": \"${AppDomainName}\""
+                        },
+                        ",",
+                        {
+                          "Fn::Sub": "\"AppHostedZoneId\": \"${AppHostedZoneId}\""
+                        },
+                        ",",
+                        {
+                          "Fn::Sub": "\"AppAcmCertificateArn\": \"${AppAcmCertificateArn}\""
+                        },
                         "}"
                       ]
                     ]
@@ -231,6 +258,23 @@
                   "Extract": "true"
                 },
                 "InputArtifacts": [{ "Name": "builtAssets" }]
+              }
+            ]
+          },
+          {
+            "Name": "Invalidate",
+            "Actions": [
+              {
+                "Name": "Lambda",
+                "ActionTypeId": {
+                  "Category": "Invoke",
+                  "Owner": "AWS",
+                  "Provider": "Lambda",
+                  "Version": "1"
+                },
+                "Configuration": {
+                  "FunctionName": { "Ref": "CIInvalidationFunction" }
+                }
               }
             ]
           }
@@ -403,6 +447,96 @@
       "Type": "AWS::Logs::LogGroup",
       "Properties": { "RetentionInDays": 365 }
     },
+    "CIInvalidationFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Runtime": "nodejs12.x",
+        "Handler": "index.handler",
+        "Timeout": 20,
+        "Role": { "Fn::GetAtt": ["CIInvalidationFunctionRole", "Arn"] },
+        "Environment": {
+          "Variables": {
+            "DISTRIBUTION_ID": { "Ref": "AppDistribution" }
+          }
+        },
+        "Code": {
+          "ZipFile": {
+            "Fn::Join": [
+              "\n",
+              [
+                "const { CloudFront, CodePipeline } = require('aws-sdk');",
+                "exports.handler = async (event, context) => {",
+                "  const codePipeline = new CodePipeline();",
+                "  const jobId = event['CodePipeline.job'].id;",
+                "  try {",
+                "    const createInvalidationResponse = await new CloudFront().createInvalidation({",
+                "      DistributionId: process.env.DISTRIBUTION_ID,",
+                "      InvalidationBatch: {",
+                "        CallerReference: Date.now().toString(),",
+                "        Paths: {",
+                "          Quantity: 1,",
+                "          Items: [",
+                "            '/*'",
+                "          ]",
+                "        }",
+                "      }",
+                "    }).promise();",
+                "    console.log(JSON.stringify({createInvalidationResponse}))",
+                "    return await codePipeline.putJobSuccessResult({jobId}).promise();",
+                "  } catch(err) {",
+                "    return await codePipeline.putJobFailureResult({",
+                "      jobId,",
+                "      type: 'JobFailed',",
+                "      externalExecutionId: context.awsRequestId,",
+                "      message: err.message,",
+                "    }).promise();",
+                "  }",
+                "};"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "CIInvalidationFunctionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": { "Fn::Sub": "lambda.${AWS::URLSuffix}" }
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+          "arn:aws:iam::aws:policy/AWSCodePipelineCustomActionAccess",
+          { "Ref": "CIInvalidationFunctionRolePolicy" }
+        ]
+      }
+    },
+    "CIInvalidationFunctionRolePolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": ["cloudfront:CreateInvalidation"],
+              "Resource": {
+                "Fn::Sub": "arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${AppDistribution}"
+              }
+            }
+          ]
+        }
+      }
+    },
     "AppBucket": {
       "Type": "AWS::S3::Bucket"
     },
@@ -419,12 +553,24 @@
               "Effect": "Allow",
               "Principal": {
                 "CanonicalUser": {
-                  "Fn::Sub": "${AppOriginAccessIdentity.S3CanonicalUserId}"
+                  "Fn::GetAtt": ["AppOriginAccessIdentity", "S3CanonicalUserId"]
                 }
               },
               "Action": "s3:GetObject",
               "Resource": {
                 "Fn::Sub": "${AppBucket.Arn}/*"
+              }
+            },
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "CanonicalUser": {
+                  "Fn::GetAtt": ["AppOriginAccessIdentity", "S3CanonicalUserId"]
+                }
+              },
+              "Action": "s3:ListBucket",
+              "Resource": {
+                "Fn::GetAtt": ["AppBucket", "Arn"]
               }
             }
           ]
@@ -449,6 +595,12 @@
           "DefaultRootObject": "index.html",
           "HttpVersion": "http2",
           "IPV6Enabled": true,
+          "Aliases": [{ "Ref": "AppDomainName" }],
+          "ViewerCertificate": {
+            "AcmCertificateArn": { "Ref": "AppAcmCertificateArn" },
+            "SslSupportMethod": "sni-only",
+            "MinimumProtocolVersion": "TLSv1.2_2019"
+          },
           "Logging": {
             "Bucket": {
               "Fn::GetAtt": ["AppLoggingBucket", "DomainName"]
@@ -463,7 +615,16 @@
             "ViewerProtocolPolicy": "redirect-to-https",
             "ForwardedValues": {
               "QueryString": false
-            }
+            },
+            "LambdaFunctionAssociations": [
+              {
+                "IncludeBody": false,
+                "EventType": "origin-request",
+                "LambdaFunctionARN": {
+                  "Ref": "AppNormalizeTrailingSlashFunctionVersion"
+                }
+              }
+            ]
           },
           "Origins": [
             {
@@ -477,12 +638,99 @@
                 }
               }
             }
+          ],
+          "CustomErrorResponses": [
+            {
+              "ErrorCode": 404,
+              "ResponsePagePath": "/404.html",
+              "ResponseCode": 404
+            }
           ]
         }
       }
     },
     "AppLoggingBucket": {
       "Type": "AWS::S3::Bucket"
+    },
+    "AppRecordSetGroup": {
+      "Type": "AWS::Route53::RecordSetGroup",
+      "Properties": {
+        "HostedZoneId": { "Ref": "AppHostedZoneId" },
+        "RecordSets": [
+          {
+            "Name": { "Ref": "AppDomainName" },
+            "Type": "A",
+            "AliasTarget": {
+              "HostedZoneId": "Z2FDTNDATAQYW2",
+              "DNSName": {
+                "Fn::GetAtt": ["AppDistribution", "DomainName"]
+              }
+            }
+          },
+          {
+            "Name": { "Ref": "AppDomainName" },
+            "Type": "AAAA",
+            "AliasTarget": {
+              "HostedZoneId": "Z2FDTNDATAQYW2",
+              "DNSName": {
+                "Fn::GetAtt": ["AppDistribution", "DomainName"]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "AppNormalizeTrailingSlashFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Runtime": "nodejs12.x",
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": ["AppNormalizeTrailingSlashFunctionRole", "Arn"]
+        },
+        "Code": {
+          "ZipFile": {
+            "Fn::Join": [
+              "\n",
+              [
+                "exports.handler = async (event) => {",
+                "  const {request} = event.Records[0].cf;",
+                "  return {...request, uri: request.uri.replace(/\\/$/, '/index.html')};",
+                "};"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "AppNormalizeTrailingSlashFunctionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  { "Fn::Sub": "lambda.${AWS::URLSuffix}" },
+                  { "Fn::Sub": "edgelambda.${AWS::URLSuffix}" }
+                ]
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        ]
+      }
+    },
+    "AppNormalizeTrailingSlashFunctionVersion": {
+      "Type": "AWS::Lambda::Version",
+      "Properties": {
+        "FunctionName": { "Ref": "AppNormalizeTrailingSlashFunction" }
+      }
     }
   }
 }

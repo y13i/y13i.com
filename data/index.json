@@ -1,0 +1,75 @@
+{
+  "profile": {
+    "name": {
+      "en": {
+        "familyName": "Yamaguchi",
+        "givenName": "Yoriki"
+      },
+      "ja": {
+        "familyName": "山口",
+        "givenName": "与力"
+      }
+    },
+    "social": {
+      "github": "y13i",
+      "flickr": "y13i",
+      "soundcloud": "y13i",
+      "twitter": "y015i",
+      "facebook": "yoriki.yamaguchi",
+      "linkedin": "yoriki"
+    },
+    "location": "Dublin, Ireland",
+    "languages": ["日本語", "English"],
+    "email": "yorikiyamaguchi@gmail.com"
+  },
+  "works": [
+    {
+      "year": 2020,
+      "kind": "Music",
+      "title": "Steven Wilson - Personal Shopper (y13i Remix)",
+      "url": "https://soundcloud.com/y13i/steven-wilson-personal-shopper-y13i-remix"
+    },
+    {
+      "year": 2018,
+      "kind": "Code",
+      "title": "cfn-schema",
+      "url": "https://github.com/y13i/cfn-schema"
+    },
+    {
+      "year": 2017,
+      "kind": "Code",
+      "title": "awsprice",
+      "url": "https://github.com/y13i/awsprice"
+    },
+    {
+      "year": 2017,
+      "kind": "Code",
+      "title": "retryx",
+      "url": "https://github.com/y13i/retryx"
+    },
+    {
+      "year": 2016,
+      "kind": "Code",
+      "title": "metrin",
+      "url": "https://github.com/y13i/metrin"
+    },
+    {
+      "year": 2015,
+      "kind": "Photography",
+      "title": "Resonances -tribute to bermei.inazawa-",
+      "url": "http://sc15th.com/tribute-album/"
+    },
+    {
+      "year": 2015,
+      "kind": "Press",
+      "title": "WEB+DB PRESS Vol.85",
+      "url": "http://gihyo.jp/magazine/wdpress/archive/2015/vol85"
+    },
+    {
+      "year": 2015,
+      "kind": "Code",
+      "title": "sgviz",
+      "url": "https://github.com/y13i/sgviz"
+    }
+  ]
+}
