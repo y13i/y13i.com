@@ -419,12 +419,24 @@
               "Effect": "Allow",
               "Principal": {
                 "CanonicalUser": {
-                  "Fn::Sub": "${AppOriginAccessIdentity.S3CanonicalUserId}"
+                  "Fn::GetAtt": ["AppOriginAccessIdentity", "S3CanonicalUserId"]
                 }
               },
               "Action": "s3:GetObject",
               "Resource": {
                 "Fn::Sub": "${AppBucket.Arn}/*"
+              }
+            },
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "CanonicalUser": {
+                  "Fn::GetAtt": ["AppOriginAccessIdentity", "S3CanonicalUserId"]
+                }
+              },
+              "Action": "s3:ListBucket",
+              "Resource": {
+                "Fn::GetAtt": ["AppBucket", "Arn"]
               }
             }
           ]
