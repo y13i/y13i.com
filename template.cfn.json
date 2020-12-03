@@ -74,7 +74,8 @@
                 "cloudformation:DescribeChangeSet",
                 "cloudformation:ExecuteChangeSet",
                 "cloudformation:SetStackPolicy",
-                "cloudformation:ValidateTemplate"
+                "cloudformation:ValidateTemplate",
+                "lambda:ListFunctions"
               ],
               "Resource": "*"
             },
@@ -97,6 +98,11 @@
               "Effect": "Allow",
               "Action": ["codebuild:StartBuild", "codebuild:BatchGet*"],
               "Resource": { "Fn::GetAtt": ["CIBuildProject", "Arn"] }
+            },
+            {
+              "Effect": "Allow",
+              "Action": ["lambda:InvokeFunction"],
+              "Resource": { "Fn::GetAtt": ["CIInvalidationFunction", "Arn"] }
             }
           ]
         }
@@ -252,6 +258,23 @@
                   "Extract": "true"
                 },
                 "InputArtifacts": [{ "Name": "builtAssets" }]
+              }
+            ]
+          },
+          {
+            "Name": "Invalidate",
+            "Actions": [
+              {
+                "Name": "Lambda",
+                "ActionTypeId": {
+                  "Category": "Invoke",
+                  "Owner": "AWS",
+                  "Provider": "Lambda",
+                  "Version": "1"
+                },
+                "Configuration": {
+                  "FunctionName": { "Ref": "CIInvalidationFunction" }
+                }
               }
             ]
           }
