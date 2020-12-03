@@ -464,20 +464,33 @@
             "Fn::Join": [
               "\n",
               [
-                "const { CloudFront } = require('aws-sdk');",
-                "exports.handler = async () => {",
-                "  return await new CloudFront().createInvalidation({",
-                "    DistributionId: process.env.DISTRIBUTION_ID,",
-                "    InvalidationBatch: {",
-                "      CallerReference: Date.now().toString(),",
-                "      Paths: {",
-                "        Quantity: 1,",
-                "        Items: [",
-                "          '/*'",
-                "        ]",
+                "const { CloudFront, CodePipeline } = require('aws-sdk');",
+                "exports.handler = async (event, context) => {",
+                "  const codePipeline = new CodePipeline();",
+                "  const jobId = event['CodePipeline.job'].id;",
+                "  try {",
+                "    const createInvalidationResponse = await new CloudFront().createInvalidation({",
+                "      DistributionId: process.env.DISTRIBUTION_ID,",
+                "      InvalidationBatch: {",
+                "        CallerReference: Date.now().toString(),",
+                "        Paths: {",
+                "          Quantity: 1,",
+                "          Items: [",
+                "            '/*'",
+                "          ]",
+                "        }",
                 "      }",
-                "    }",
-                "  }).promise();",
+                "    }).promise();",
+                "    console.log({createInvalidationResponse})",
+                "    return await codePipeline.putJobSuccessResult({jobId}).promise();",
+                "  } catch(err) {",
+                "    return await codePipeline.putJobFailureResult({",
+                "      jobId,",
+                "      type: 'JobFailed',",
+                "      externalExecutionId: context.awsRequestId,",
+                "      message: err.message,",
+                "    }).promise();",
+                "  }",
                 "};"
               ]
             ]
@@ -502,6 +515,7 @@
         },
         "ManagedPolicyArns": [
           "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+          "arn:aws:iam::aws:policy/AWSCodePipelineCustomActionAccess",
           { "Ref": "CIInvalidationFunctionRolePolicy" }
         ]
       }
@@ -601,7 +615,16 @@
             "ViewerProtocolPolicy": "redirect-to-https",
             "ForwardedValues": {
               "QueryString": false
-            }
+            },
+            "LambdaFunctionAssociations": [
+              {
+                "IncludeBody": false,
+                "EventType": "origin-request",
+                "LambdaFunctionARN": {
+                  "Ref": "AppNormalizeTrailingSlashFunctionVersion"
+                }
+              }
+            ]
           },
           "Origins": [
             {
@@ -675,7 +698,10 @@
             {
               "Effect": "Allow",
               "Principal": {
-                "Service": { "Fn::Sub": "lambda.${AWS::URLSuffix}" }
+                "Service": [
+                  { "Fn::Sub": "lambda.${AWS::URLSuffix}" },
+                  { "Fn::Sub": "edgelambda.${AWS::URLSuffix}" }
+                ]
               },
               "Action": "sts:AssumeRole"
             }
@@ -684,6 +710,12 @@
         "ManagedPolicyArns": [
           "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
         ]
+      }
+    },
+    "AppNormalizeTrailingSlashFunctionVersion": {
+      "Type": "AWS::Lambda::Version",
+      "Properties": {
+        "FunctionName": { "Ref": "AppNormalizeTrailingSlashFunction" }
       }
     }
   }
