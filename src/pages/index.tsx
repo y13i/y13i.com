@@ -155,6 +155,7 @@ const IndexPage: React.FC<PageProps<GatsbyTypes.IndexPageQuery>> = ({
               <a
                 href={`https://github.com/${data.dataJson?.profile?.social?.github}`}
                 title={`GitHub: ${data.dataJson?.profile?.social?.github}`}
+                rel="me"
               >
                 <Icon
                   icon={githubIcon}
@@ -167,6 +168,7 @@ const IndexPage: React.FC<PageProps<GatsbyTypes.IndexPageQuery>> = ({
               <a
                 href={`https://facebook.com/${data.dataJson?.profile?.social?.facebook}`}
                 title={`Facebook: ${data.dataJson?.profile?.social?.facebook}`}
+                rel="me"
               >
                 <Icon
                   icon={facebookIcon}
@@ -179,6 +181,7 @@ const IndexPage: React.FC<PageProps<GatsbyTypes.IndexPageQuery>> = ({
               <a
                 href={`https://linkedin.com/in/${data.dataJson?.profile?.social?.linkedin}/`}
                 title={`LinkedIn: ${data.dataJson?.profile?.social?.linkedin}`}
+                rel="me"
               >
                 <Icon
                   icon={linkedinIcon}
@@ -191,6 +194,7 @@ const IndexPage: React.FC<PageProps<GatsbyTypes.IndexPageQuery>> = ({
               <a
                 href={`https://www.flickr.com/people/${data.dataJson?.profile?.social?.flickr}/`}
                 title={`Flickr: ${data.dataJson?.profile?.social?.flickr}`}
+                rel="me"
               >
                 <Icon
                   icon={flickrIcon}
@@ -203,6 +207,7 @@ const IndexPage: React.FC<PageProps<GatsbyTypes.IndexPageQuery>> = ({
               <a
                 href={`https://soundcloud.com/${data.dataJson?.profile?.social?.soundcloud}`}
                 title={`SoundCloud: ${data.dataJson?.profile?.social?.soundcloud}`}
+                rel="me"
               >
                 <Icon
                   icon={soundcloudIcon}
@@ -215,6 +220,7 @@ const IndexPage: React.FC<PageProps<GatsbyTypes.IndexPageQuery>> = ({
               <a
                 href={`https://twitter.com/${data.dataJson?.profile?.social?.twitter}`}
                 title={`Twitter: ${data.dataJson?.profile?.social?.twitter}`}
+                rel="me"
               >
                 <Icon
                   icon={twitterIcon}
