@@ -23,7 +23,7 @@
     "gatsby-plugin-react-helmet": "3.8.0",
     "gatsby-plugin-sharp": "2.12.0",
     "gatsby-plugin-styled-components": "3.8.0",
-    "gatsby-plugin-typegen": "2.2.2",
+    "gatsby-plugin-typegen": "2.2.3",
     "gatsby-plugin-web-font-loader": "1.0.4",
     "gatsby-source-filesystem": "2.9.0",
     "gatsby-transformer-json": "2.9.0",
