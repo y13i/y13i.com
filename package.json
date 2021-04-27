@@ -11,9 +11,9 @@
   "dependencies": {
     "@iconify-icons/mdi": "1.1.12",
     "@iconify/react": "1.1.4",
-    "@material-ui/core": "4.11.3",
+    "@material-ui/core": "4.11.4",
     "@material-ui/icons": "4.11.2",
-    "@material-ui/styles": "4.11.3",
+    "@material-ui/styles": "4.11.4",
     "fontsource-roboto": "4.0.0",
     "gatsby": "3.2.1",
     "gatsby-image": "3.2.0",
