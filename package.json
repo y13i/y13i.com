@@ -37,7 +37,7 @@
     "styled-reset": "4.3.4"
   },
   "devDependencies": {
-    "@types/react-helmet": "6.1.0",
+    "@types/react-helmet": "6.1.1",
     "@types/styled-components": "5.1.9",
     "eslint": "7.22.0",
     "eslint-config-prettier": "8.1.0",
